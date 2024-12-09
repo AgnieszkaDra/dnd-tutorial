@@ -11,7 +11,7 @@ function KanbanBoard() {
     const [columns, setColumns] = useState<Column[]>([])
     const columnsId = useMemo(() => columns.map((col) => col.id), [columns])
 
-    //const [tasks, setTasks] = useState<Task[]>([])
+    const [tasks, setTasks] = useState<Task[]>([])
     const [activeColumn, setActiveColumn] = useState<Column | null>(null)
     const sensors = useSensors(useSensor(PointerSensor, {
         activationConstraint: {
@@ -43,6 +43,10 @@ function KanbanBoard() {
                             column={col} 
                             deleteColumn={deleteColumn}
                             updateColumn={updateColumn}
+                            createTask={createTask}
+                            deleteTask={deleteTask}
+                            updateTask={updateTask}
+                            tasks={tasks.filter((task) => task.columnId === col.id)}
                         />
                     ))}
                 </SortableContext>
@@ -77,6 +81,10 @@ function KanbanBoard() {
                                     column={activeColumn} 
                                     deleteColumn={deleteColumn}
                                     updateColumn={updateColumn}
+                                    createTask={createTask}
+                                    deleteTask={deleteTask}
+                                    updateTask={updateTask}
+                                    tasks={tasks.filter((task) => task.columnId === activeColumn.id)}
                                 />
                             )}
                         </DragOverlay>,
@@ -87,9 +95,30 @@ function KanbanBoard() {
                 </div> 
             </div> 
             </DndContext>
-            
         </div>
     )
+
+    function createTask(columnId: Id) {
+        const newTask: Task = {
+            id: generateId(),
+            columnId,
+            content: `Task ${tasks.length + 1}`,
+        };
+        setTasks([...tasks, newTask])
+    }
+
+    function deleteTask(id: Id) {
+        const newTasks = tasks.filter((task) => task.id !== id)
+        setTasks(newTasks)
+    }
+
+    function updateTask(id: Id, content: string) {
+        const newTasks = tasks.map(task => {
+            if(task.id !== id) return task;
+            return {...task, content}
+        })
+        setTasks(newTasks)
+    }
 
     function createNewColumn() {
         const columnToAdd:Column = {
